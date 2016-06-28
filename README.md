@@ -1,33 +1,35 @@
 # Fort-Knox
 A Virtual encrypted file system
 
-###About
+### About
 
-Fort Knox is a virtual encrypted file system. You can place some files in the 'files' directory and run fortKnox.py, login and encrypt those files. These files will be encrypted and stored in the 'vault'. Now you can delete those files in the 'files' folder. To retrieve them you can decrypt them using Fort Knox. Fort Knox has its own terminal like unix with some basic commands. 
+Fort Knox is a virtual encrypted file system. You can place some files in the 'files' directory and run fortKnox.py, login and encrypt those files. These files will be encrypted and stored in the 'vault'. Now you can delete those files in the 'files' folder. To retrieve them you can decrypt them using Fort Knox. Fort Knox has its own terminal like unix with some basic commands.
 
-###Installation
+### Installation
 
 Download the repo onto your system. Make sure you have the dependencies(Crypto.Cipher and colorama) installed. Use following commands to do that.
 
-easy_install pycrypto
-easy_install colorama
+`easy_install pycrypto`  
+
+`easy_install colorama`
+
 
 Run fortKnox.py
-password is 12345678
-change password by typing 'changepass' and pressing enter.
-Password must be 8 charecters long only.
-a key will be used for encryption, by default it will be 12345678901234567890123456789012
-change this key to some random key by 'changekey'. key must be 32 chars long.
-use 'help' for list of commands
+You can setup your password now. Enter a password of your choice and enter it again when asked.
+Fort-knox will now be setup, Login again to start using.
 
-###What this could be used for
+###### Note:  
+* You change password by typing 'changepass' and pressing enter.
+* use 'help' for list of commands
+
+### What this could be used for
 
 - To maintain a diary. Simply create a folder in 'files' add your entries as files, decrypt and read when needed.
 - To maintain a journal, working on a top-secret project? Use this as a journal
 - To store your secret project files
 - To store sensetive files/information like passwords
 
-###Usage
+### Usage
 
 Place files in 'files' folder.
 List of commands:
@@ -45,9 +47,6 @@ List of commands:
 - chanhekey : to change key
 - e : prints a tux because why not?
 
-###Screenshot and demo
-
-Will be updated soon
 
 ### Disclaimer
 THIS DOCUMENT IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS. COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE DOCUMENT OR THE PERFORMANCE OR IMPLEMENTATION OF THE CONTENTS THEREOF. The name and trademarks of copyright holders may NOT be used in advertising or publicity pertaining to this document or its contents without specific, written prior permission. Title to copyright in this document will at all times remain with copyright holders.
