@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 '''
-  ______         _     _  __                
- |  ____|       | |   | |/ /                
+  ______         _     _  __
+ |  ____|       | |   | |/ /
  | |__ ___  _ __| |_  | ' / _ __   _____  __
  |  __/ _ \| '__| __| |  < | '_ \ / _ \ \/ /
- | | | (_) | |  | |_  | . \| | | | (_) >  < 
- |_|  \___/|_|   \__| |_|\_\_| |_|\___/_/\_\ 
+ | | | (_) | |  | |_  | . \| | | | (_) >  <
+ |_|  \___/|_|   \__| |_|\_\_| |_|\___/_/\_\
 
  Fort Knox V0.1
  Vinay C K
@@ -15,7 +15,7 @@
 '''
 from __future__ import print_function
 import getpass
-import shutil
+import shutil, hashlib, binascii
 import os, random, struct
 from Crypto.Cipher import AES
 import pprint, pickle
@@ -31,7 +31,6 @@ print(Fore.CYAN + ' |_|  \___/|_|   \__| |_|\_\_| |_|\___/_/\_\ ')
 print(Style.RESET_ALL)
 print("v0.1 VINAY C K")
 
-pswd = getpass.getpass('PASSWORD: ')
 
 def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
     if not out_filename:
@@ -66,23 +65,101 @@ def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
                 outfile.write(decryptor.decrypt(chunk))
             outfile.truncate(origsize)
 
+#string encryption functions; stringlength % 16 == 0
+def scrypt(key, iv, stringin):
+    encryptor = AES.new(key, AES.MODE_CBC, iv)
+    return encryptor.encrypt(stringin)
+def sdcrypt(key, iv, stringin):
+    decryptor = AES.new(key, AES.MODE_CBC, iv)
+    return decryptor.decrypt(stringin)
+
+def setup():
+
+    print("Welcome to Fort-Knox, setting up your vault")
+
+    def getpassword(depth):
+        if depth == 3:
+            exit(1)
+        pswd = getpass.getpass('PASSWORD: ')
+        pswd2 = getpass.getpass('AGAIN: ')
+        if(pswd != pswd2):
+            print(Fore.RED, "Passwords don't match, try again", Style.RESET_ALL)
+            return getpassword(depth + 1)
+        return pswd
+    pswd = getpassword(0)
+
+    key = binascii.hexlify(os.urandom(16)) #AES key
+    salt = binascii.hexlify(os.urandom(64)) #pdkbf2 salt
+
+    for i in ["vault", "files", "backup"]:
+        os.makedirs(i)
+
+    with open('./vault/1.t', 'w') as file1:
+        pickle.dump([{}, {}], file1 )
+    with open('./vault/2.t', 'w') as file2:
+        pickle.dump( {'fno': 3}, file2)
+    with open('./vault/salt.ini', 'w') as saltfile:
+        pickle.dump( salt, saltfile )
+
+    for i in ['./vault/1.t', './vault/2.t']:
+        encrypt_file(key, i, i[:-2:])
+        os.remove(i)
+
+
+    der_key = hashlib.pbkdf2_hmac('sha256', pswd,salt, 100000, 16)
+    iv = ''.join(chr(random.randint(0, 0xFF)) for i in range(16))
+
+    enckey = scrypt(der_key, iv, key)
+    #print("dBug\n", "pswd ", pswd, "\nkey ", key, "\nsalt ", salt, "\nder key ", der_key, "\niv ", iv, "\nenckey ", enckey, "\n\n")
+    with open('./vault/0', 'w') as file0:
+        pickle.dump(iv, file0)
+        pickle.dump(enckey, file0)
+
+    print("Done! Please Login again.")
+    exit(0)
+
+
+
+
+
+
 try:
-    if(len(pswd) != 8):
-        raise Exception
-    decrypt_file(pswd+pswd, './vault/0')
-    mfile = open('./vault/0.t', 'rb')
-    auth = pickle.load(mfile)
-    mfile.close()
-    key = auth['key']
-    os.remove('./vault/0.t')
+    with open('./vault/salt.ini', 'r') as open_config:
+	       salt = pickle.load(open_config) # loads salt
+
+except:
+    setup()
+
+pswd = getpass.getpass('PASSWORD: ')
+with open("./vault/salt.ini") as saltfile:
+    salt = pickle.load(saltfile)
+
+try:
+
+    der_key = hashlib.pbkdf2_hmac('sha256', pswd,salt, 100000, 16) #derived key
+
+    with open('./vault/0', 'r') as file0:
+        iv = pickle.load(file0)
+        ckey = pickle.load(file0)
+
+    key = sdcrypt(der_key, iv, ckey)
+    decrypt_file(key, './vault/2')
+
+    with open('./vault/2.t', 'r') as testfile:
+        temp = pickle.load(testfile)
+    os.remove('./vault/2.t')
+
+    #print("dBug\n", "pswd ", pswd, "\nder key ", der_key, "\nsalt", salt, "iv ", iv, "\nenckey ", ckey, "key ", key )
     print(Fore.GREEN + "Access granted" + Style.RESET_ALL)
+
 except:
     print("I think U is a intruder. okie. bi.")
     try:
-        os.remove('./vault/0.t')
+        os.remove('./vault/2.t')
     except:
         pass
     exit(1)
+
 
 dire = []
 updv = None
@@ -212,7 +289,7 @@ def deDir(direc):
                 os.makedirs(os.path.dirname(s + i))
             except OSError as exc:
                 if exc.errno != errno.EEXIST:
-                    raise                         
+                    raise
         decrypt_file(key, './vault/'+str(v[1][i]), out_filename= s + i)
 
 cc = ""
@@ -396,7 +473,7 @@ while True:
                     print(Fore.RED + "File " + c[1] + " not found" + Style.RESET_ALL)
                 elif(len(pm) == 1):
                     if(pm[0][1] == 3):
-                        if(pm[0][0] in t[1][1]):                           
+                        if(pm[0][0] in t[1][1]):
                             v = getFile(1)
                             for i in dire:
                                 v = v[0][i]
@@ -461,7 +538,7 @@ while True:
                                 os.makedirs(os.path.dirname(t[0] + pm[0][0]))
                             except OSError as exc:
                                 if exc.errno != errno.EEXIST:
-                                    raise                         
+                                    raise
                         decrypt_file(key, './vault/'+str(t[1][1][pm[0][0]]), out_filename= t[0] + pm[0][0])
                     else:
                         deDir(dire + [pm[0][0]])
@@ -576,7 +653,7 @@ while True:
 
         print(Fore.GREEN + "Encrypting everything using new key" + Style.RESET_ALL)
         enDir([])
-        
+
         print(Fore.GREEN + "All done. Relogin." + Style.RESET_ALL)
         exit(1)
     elif(c[0] == "clean"):
@@ -651,4 +728,3 @@ while True:
     else:
         if(c[0] != ''):
             print("Command '" + c[0] + "' not found. Use 'help' for the list of commands")
-
