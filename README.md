@@ -9,9 +9,14 @@ Fort Knox is a virtual encrypted file system. You can place some files in the 'f
 
 Download the repo onto your system. Make sure you have the dependencies(Crypto.Cipher and colorama) installed. Use following commands to do that.
 
+`pip install pycrypto colorama` (recommended)
+
+if you don't have pip
+
 `easy_install pycrypto`  
 
 `easy_install colorama`
+
 
 
 Run fortKnox.py
